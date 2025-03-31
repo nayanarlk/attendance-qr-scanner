@@ -44,7 +44,6 @@ class _HomePageState extends State<HomePage> {
   Future<void> _updateAttendance(phone, context) async {
     var urlGiftStatus = _giftStatus ? "1" : "0";
 
-    print('$uri/registered_user_qr/$phone-$urlGiftStatus');
     final url = Uri.parse('$uri/registered_user_qr/$phone-$urlGiftStatus');
 
     try {
@@ -52,24 +51,31 @@ class _HomePageState extends State<HomePage> {
       final data = json.decode(response.body);
 
       if (response.statusCode == 200) {
-        print(data["detail"]);
-        if (data["detail"] == "Successfully Admitted") {
+
+        if (data["detail"] == "Successfully Admitted only.") {
           QuickAlert.show(
             context: context,
             type: QuickAlertType.success,
             title: 'Success!',
-            text: 'Attendance marked successfully.',
+            text: 'Attendance marked successfully without gift.',
+          );
+        } else if (data["detail"] == "Successfully Admitted and gift given!") {
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.success,
+            title: 'Success!',
+            text: 'Attendance marked successfully with gift.',
           );
         } else {
           QuickAlert.show(
             context: context,
             type: QuickAlertType.error,
             title: 'ERROR!',
-            text: 'Something went wrong. Please try again!',
+            text: 'Something went wrong. Please try again! 3',
           );
         }
       } else if (response.statusCode == 404) {
-        if (data["detail"] == 'Already admitted') {
+        if (data["detail"] == "Already admitted") {
           QuickAlert.show(
             context: context,
             type: QuickAlertType.info,
@@ -81,7 +87,7 @@ class _HomePageState extends State<HomePage> {
             context: context,
             type: QuickAlertType.error,
             title: 'ERROR!',
-            text: 'Something went wrongsss. Please try again!',
+            text: 'Something went wrongsss. Please try again! 1',
           );
         }
       } else {
@@ -89,7 +95,7 @@ class _HomePageState extends State<HomePage> {
           context: context,
           type: QuickAlertType.error,
           title: 'ERROR!',
-          text: 'Something went wrong. Please try again!',
+          text: 'Something went wrong. Please try again! 2',
         );
       }
     } catch (e) {
