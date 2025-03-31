@@ -1,2 +1,2 @@
 // ignore: file_names
-String uri = 'https://localhost:8000/api';
+String uri = 'http://localhost:3000';

@@ -42,24 +42,48 @@ class _HomePageState extends State<HomePage> {
   String _epf_no = '';
 
   Future<void> _updateAttendance(phone, context) async {
-    final url = Uri.parse('$uri/registered_user/$phone-$_giftStatus');
+    var urlGiftStatus = _giftStatus ? "1" : "0";
+
+    print('$uri/registered_user_qr/$phone-$urlGiftStatus');
+    final url = Uri.parse('$uri/registered_user_qr/$phone-$urlGiftStatus');
 
     try {
       final response = await http.put(url);
+      final data = json.decode(response.body);
+
       if (response.statusCode == 200) {
-        QuickAlert.show(
-          context: context,
-          type: QuickAlertType.success,
-          title: 'Success!',
-          text: 'Attendance marked successfully.',
-        );
+        print(data["detail"]);
+        if (data["detail"] == "Successfully Admitted") {
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.success,
+            title: 'Success!',
+            text: 'Attendance marked successfully.',
+          );
+        } else {
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.error,
+            title: 'ERROR!',
+            text: 'Something went wrong. Please try again!',
+          );
+        }
       } else if (response.statusCode == 404) {
-        QuickAlert.show(
-          context: context,
-          type: QuickAlertType.info,
-          title: 'Already Marked!',
-          text: 'Scanned phone number is already marked as attended.',
-        );
+        if (data["detail"] == 'Already admitted') {
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.info,
+            title: 'Already Marked!',
+            text: 'Scanned phone number is already marked as attended.',
+          );
+        } else {
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.error,
+            title: 'ERROR!',
+            text: 'Something went wrongsss. Please try again!',
+          );
+        }
       } else {
         QuickAlert.show(
           context: context,
@@ -74,14 +98,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> fetchSecureData(phone, context) async {
-    final url = Uri.parse('$uri/registered_user_qr/$phone');
+    final url = Uri.parse('$uri/registered_user/$phone');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
         setState(() {
-          _clearFields();
           _name = data["Name"];
           _epf_no = data["EPF No"];
           _giftStatus = data["Gift_status"];
@@ -149,8 +172,9 @@ class _HomePageState extends State<HomePage> {
                 );
                 setState(() {
                   _phone_no = res as String;
-                  fetchSecureData(_phone_no, context);
                 });
+
+                fetchSecureData(_phone_no, context);
               },
               icon: Icon(Icons.qr_code_scanner, size: 40.0),
               label: Text(
